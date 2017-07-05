@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
@@ -36,7 +37,14 @@ public class PebbleMessageListener extends PebbleKit.PebbleDataReceiver {
         PebbleKit.sendAckToPebble(context, transactionId);
 
         if(data.getInteger(KEY_BUTTON) != null) {
-            Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+            final int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+
+            audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION,
+                    audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION), 0);
+
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                     .setSmallIcon(android.R.drawable.ic_dialog_alert)
@@ -50,6 +58,8 @@ public class PebbleMessageListener extends PebbleKit.PebbleDataReceiver {
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
             notificationManager.notify(0, notificationBuilder.build());
+
+//            audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, currentVolume, 0);
         }
     }
 }
